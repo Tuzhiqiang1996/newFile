@@ -1,11 +1,12 @@
 <!--  -->
 <template>
-  <div class="">
+  <div class="devbox">
     <div style="margin: 0 auto; display: table">
       <el-table
         ref="filterTable"
         :data="tableData"
-        style="width: 100%;"
+        style="width: 100%"
+        height="288"
       >
         <el-table-column prop="deviceid" label="deviceid" width="150">
         </el-table-column>
@@ -123,4 +124,12 @@ export default {
 </script>
 <style lang='scss' scoped>
 //@import url(); 引入公共css类
+.devbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-top: 5%;
+  flex-direction: column;
+}
 </style>

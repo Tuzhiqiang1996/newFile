@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -61,31 +63,32 @@ public class DevlistController {
      * @message 批量插入
      * List<Devlist> devlist 接收前端对象数组
      * 实现循环插入
+     * 去重场景 实现之前查询表中是否有相同的 的数据 相同不插入 反之
+     * 详情
+     * 先查询是否存在
+     * 为空则插入数据库
+     *
      */
     @PostMapping("/savelist")
     public Result savelist(@RequestBody List<Devlist> devlist) {
         Devlist dd = null;
         dd = new Devlist();
+        dd.setCreated(LocalDateTime.now());
         List<Devlist> entityList = new ArrayList<>(devlist);
-
-//        System.out.println(devlist);
-//        System.out.println(devlist.size());
-//        System.out.println(entityList.size());
         for (int i = 0; i < entityList.size(); i++) {
-// System.out.println(entityList.get(i));
-            dd.setCreated(LocalDateTime.now());
-//            BeanUtil.copyProperties(entityList.get(i), dd );
-            BeanUtil.copyProperties(entityList.get(i), dd, "created");
+            QueryWrapper<Devlist> queryWrapper = new QueryWrapper<>();
+            queryWrapper.like("deviceid", entityList.get(i).getDeviceid());
+            List<Devlist> dds = devlistService.list(queryWrapper);
+            if (dds == null || dds.size() == 0) {
+                BeanUtil.copyProperties(entityList.get(i), dd, "created");
+                devlistService.saveOrUpdate(dd);
+            }
+//            System.out.println(dds);
+//            System.out.println(entityList.get(i).getDeviceid());
+//     wuxiao       BeanUtil.copyProperties(entityList.get(i), dd );
 
-
-            devlistService.saveOrUpdate(dd);
-//            System.out.println(dd);
-//            System.out.println(entityList);
         }
-//        boolean d = devlistService.saveBatch(entityList); //先注销到
-//        System.out.println(d);
-//        System.out.println(dd);
-//        System.out.println(entityList);
+
         return Result.succ("批量插入成功", null);
     }
 
@@ -102,13 +105,14 @@ public class DevlistController {
         return Result.succ("操作成功！", pageData);
     }
 
-/**
- * [java.lang.String, java.lang.Integer]
- * @author Tu
- * @date 2021/3/27 16:05
- * @message 模糊查询功能
- * @return com.example.common.lang.Result
- */
+    /**
+     * [java.lang.String, java.lang.Integer]
+     *
+     * @return com.example.common.lang.Result
+     * @author Tu
+     * @date 2021/3/27 16:05
+     * @message 模糊查询功能
+     */
     @GetMapping("/devquery")
     public Result devquery(String deviceid, Integer currentPage) {
         if (currentPage == null || currentPage < 1) {
@@ -122,7 +126,11 @@ public class DevlistController {
 
         IPage pageData = devlistService.page(page, queryWrapper);
 
+        List<Devlist> deviceLogLists = devlistService.list(queryWrapper);
 
-        return Result.succ("查询成功",pageData);
+        if (deviceLogLists == null || deviceLogLists.size() == 0) {
+            return Result.fail("没有数据！");
+        }
+        return Result.succ("查询成功", pageData);
     }
 }
