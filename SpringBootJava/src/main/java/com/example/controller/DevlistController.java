@@ -71,6 +71,9 @@ public class DevlistController {
      */
     @PostMapping("/savelist")
     public Result savelist(@RequestBody List<Devlist> devlist) {
+        if(devlist.size()==0||devlist==null){
+            return Result.fail("插入数据为空！");
+        }
         Devlist dd = null;
         dd = new Devlist();
         dd.setCreated(LocalDateTime.now());
@@ -120,9 +123,11 @@ public class DevlistController {
         }
         Page page = new Page(currentPage, 5);
         QueryWrapper<Devlist> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc("created");
-        queryWrapper.like("deviceid", deviceid);
+        if(deviceid != null && deviceid.length() != 0){
+            queryWrapper.like("deviceid", deviceid);
+        }
 
+        queryWrapper.orderByDesc("created");
 
         IPage pageData = devlistService.page(page, queryWrapper);
 

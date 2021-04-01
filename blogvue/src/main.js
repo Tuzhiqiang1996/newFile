@@ -11,6 +11,7 @@ Vue.config.productionTip = false;
 // axios.defaults.baseURL = 'http://127.0.0.1:8191/'; // 填写后台请求统一的地址
 axios.defaults.baseURL = "/apihttp"; // 填写后台请求统一的地址
 Vue.prototype.$axios = axios; //this.$axios
+
 /* eslint-disable no-new */
 axios.interceptors.request.use(
   config => {

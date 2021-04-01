@@ -1,6 +1,16 @@
 <!--  -->
 <template>
   <div class="devbox">
+    <div style="dispaly:felx">
+      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+  <el-form-item label="设备id">
+    <el-input v-model="formInline.devid" placeholder="设备id"></el-input>
+  </el-form-item>
+  <el-form-item>
+    <el-button type="primary" @click="onSubmit">查询</el-button>
+  </el-form-item>
+</el-form>
+    </div>
     <div style="margin: 0 auto; display: table">
       <el-table
         ref="filterTable"
@@ -8,7 +18,7 @@
         style="width: 100%"
         height="288"
       >
-        <el-table-column prop="deviceid" label="deviceid" width="150">
+        <el-table-column prop="deviceid" label="deviceid" width="120">
         </el-table-column>
         <el-table-column
           prop="factoryApikey"
@@ -16,13 +26,13 @@
           width="300"
         >
         </el-table-column>
-        <el-table-column prop="staMac" label="sta_mac" width="200">
+        <el-table-column prop="staMac" label="sta_mac" width="150">
         </el-table-column>
-        <el-table-column prop="sapMac" label="sap_mac" width="200">
+        <el-table-column prop="sapMac" label="sap_mac" width="150">
         </el-table-column>
-        <el-table-column prop="deviceModel" label="device_model" width="200">
+        <el-table-column prop="deviceModel" label="device_model" width="150">
         </el-table-column>
-        <el-table-column prop="created" label="created" width="200">
+        <el-table-column prop="created" label="created" width="150">
         </el-table-column>
 
         <!-- <el-table-column label="操作" width="180">
@@ -69,6 +79,9 @@ export default {
       currentpage: 1, //当前页数
       pagesize: 5, //每页显示条目个数
       data: {}, //数据
+      formInline:{
+        devid:''
+      }
     };
   },
   //监听属性 类似于data概念
@@ -78,10 +91,10 @@ export default {
   //方法集合
   methods: {
     pages(pages) {
-      let url = "http://localhost:8081/getdevlists?currentPage=";
+      let url = `http://localhost:8081/devquery?currentPage=${pages}&deviceid=${this.formInline.devid}`;
 
       this.$axios
-        .get(url + pages)
+        .get(url  )
         .then((res) => {
           if (res.data.code == 200) {
             this.loading = false;
@@ -89,6 +102,7 @@ export default {
             this.total = res.data.data.total;
             this.currentpage = res.data.data.current;
             this.pagesize = res.data.data.size;
+
           } else {
             this.$message({
               message: res.data.msg,
@@ -100,12 +114,15 @@ export default {
         .catch((err) => {
           console.error(err);
           this.$message({
-            message: res.data.msg,
+            message: err,
             showClose: true,
             type: "error",
           });
         });
     },
+    onSubmit(){
+      this.pages(1);
+    }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {

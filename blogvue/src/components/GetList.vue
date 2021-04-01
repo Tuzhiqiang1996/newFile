@@ -4,17 +4,12 @@
     <div>
       <div>
         <el-button @click="down2" disabled>获取设备列表</el-button>
-        <el-button @click="down4" disabled>一键插入</el-button>
+        <el-button @click="savelist"  >一键插入</el-button>
         <el-button @click="btn">先测试</el-button>
       </div>
       <div>
-        <el-table :data="datalist" style="width: 100%" height="480">
-          <!-- <el-table-column label="姓名" width="100">
-              <template slot-scope="scope">
-                <el-tag size="medium">{{ scope.row.deviceid }}</el-tag>
-              </template>
-            </el-table-column> -->
-          <el-table-column prop="deviceid" label="deviceid" width="150">
+        <el-table :data="datalist" style="width: 100%" height="480"  >
+          <el-table-column prop="deviceid" label="deviceid" width="120">
           </el-table-column>
           <el-table-column
             prop="factoryApikey"
@@ -22,11 +17,11 @@
             width="300"
           >
           </el-table-column>
-          <el-table-column prop="staMac" label="sta_mac" width="200">
+          <el-table-column prop="staMac" label="sta_mac" width="150">
           </el-table-column>
-          <el-table-column prop="sapMac" label="sap_mac" width="200">
+          <el-table-column prop="sapMac" label="sap_mac" width="150">
           </el-table-column>
-          <el-table-column prop="deviceModel" label="device_model" width="200">
+          <el-table-column prop="deviceModel" label="device_model" width="150">
           </el-table-column>
         </el-table>
       </div>
@@ -37,7 +32,7 @@
 <script>
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-
+import {format} from '../util/format'
 export default {
   name: "",
   //import引入的组件需要注入到对象中才能使用
@@ -59,7 +54,7 @@ export default {
     down2() {
       if (this.datas.availableLicenses) {
         let params = {
-          count: "2",
+          count: "1",
           once: "4545466454466465",
         };
 
@@ -73,9 +68,8 @@ export default {
           .then((res) => {
             if (res.status == 200) {
               let json = res.data;
-
               console.log(res);
-              let datalist = this.down3(json, 2);
+              let datalist = format(json);
               console.log("json", datalist[0]);
 
               this.datalist = datalist[0];
@@ -96,17 +90,6 @@ export default {
           type: "error",
         });
       }
-    },
-    down3(json, num) {
-      let json1 =
-        num == 1 ? json.replace(/\[\"\{/, "[{") : json.replace(/\[\'\{/, "[{");
-      let json2 =
-        num == 1
-          ? json1.replace(/\}\"\]/, "}]")
-          : json1.replace(/\}\'\]/, "}]");
-      let json3 = json2.replace(/ /gi, "");
-      let json4 = JSON.parse(json3); //转json对象
-      return json4;
     },
     //插入一条
     down4() {
@@ -157,27 +140,16 @@ export default {
         '{"deviceid": "10013056ca", "factory_apikey": "34f2ff7f-a6ef-4037-9d25-31aad9cbd35f", "sta_mac": "d0:27:02:60:aa:e4", "sap_mac": "d0:27:02:60:aa:e5", "device_model": "WTW-SNL-02"}',
       ];
 
-      let jj = `${j1}`;
-      let shuang = jj.replace(/\'/gi, '"');
-      let shuang1 = shuang.replace(/ /gi, "");
-      let shuang2 = shuang1.replace(/\[\"{/gi, "[{");
-      let shuang3 = shuang2.replace(/\}"]/gi, "}]");
-      let shuang4 = shuang3.replace(/\_a/gi, "A");
-      let shuang5 = shuang4.replace(/\_m/gi, "M");
-      let tu = "[" + shuang5 + "]";
-      console.log(JSON.parse(tu));
-
-      this.datalist = JSON.parse(tu);
-      this.savelist(JSON.parse(tu));
+      this.datalist = format(j1);
+    },
 
       /**
        * 下一步将数据一条条插入数据库中
        * 批量插入
        */
-    },
-    savelist(savelist) {
+    savelist( ) {
       let url = "http://localhost:8081/savelist";
-      let params = this.datalist;
+      let savelist=this.datalist
       this.$axios
         .post(url, savelist, {
           headers: {
@@ -189,7 +161,7 @@ export default {
             this.$message({
               message: res.data.msg,
               showClose: true,
-              type: "succes",
+              type: "success",
             });
           } else {
             this.$message({
@@ -209,23 +181,10 @@ export default {
           });
         });
     },
-    /**
-     * 参数格式化
-     */
-    format(data) {
-      let jj = `${data}`;
-      let shuang = jj.replace(/\'/gi, '"');
-      let shuang1 = shuang.replace(/ /gi, "");
-      let shuang2 = shuang1.replace(/\[\"{/gi, "[{");
-      let shuang3 = shuang2.replace(/\}"]/gi, "}]");
-      let shuang4 = shuang3.replace(/\_a/gi, "A");
-      let shuang5 = shuang4.replace(/\_m/gi, "M");
-      let tu = "[" + shuang5 + "]";
-      return JSON.parse(tu);
-    },
   },
   //生命周期 - 创建完成（可以访问当前this实例）
-  created() {},
+  created() {
+  },
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {},
   beforeCreate() {}, //生命周期 - 创建之前
